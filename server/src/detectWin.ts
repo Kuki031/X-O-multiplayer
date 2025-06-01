@@ -1,4 +1,4 @@
-const detectWin = function(winConditions: number[][]): boolean {
+export const detectWin = function(winConditions: number[][]): boolean {
     let isOver: boolean = false;
 
     for(let i = 0 ; i < winConditions.length ; i++) {
@@ -20,5 +20,3 @@ const detectWin = function(winConditions: number[][]): boolean {
     }
     return isOver;
 }
-
-export { detectWin };

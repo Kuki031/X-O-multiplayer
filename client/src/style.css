@@ -38,3 +38,7 @@
     cursor: pointer;
     border:1px solid whitesmoke;
 }
+
+.hidden {
+    display: none;
+}

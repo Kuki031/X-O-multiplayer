@@ -4,7 +4,7 @@ type GameConstants = {
   roles: string[];
 };
 
-const constants = function(): GameConstants {
+export const constants = function(): GameConstants {
     const GAME_OVER = false;
     const ROLES = ["X", "O"];
     const WIN_CONDITIONS = [
@@ -24,5 +24,3 @@ const constants = function(): GameConstants {
         roles: ROLES
     }
 }
-
-export { constants };

@@ -7,12 +7,21 @@ assignIds();
 const socket = io();
 
 let shouldStopGame = false;
+let shouldStartGame: boolean;
 let player: string;
 
 const main = function() {
 
-    const roleDisplay = document.querySelector('.role') as HTMLElement;
+    socket.on("waiting connection", (connReady: boolean) => {
+        shouldStartGame = connReady;
+        if (!shouldStartGame) {
+            document.querySelector(".waiting")?.classList.remove("hidden");
+        } else {
+            document.querySelector(".waiting")?.classList.add("hidden");
+        }
+    })
 
+    const roleDisplay = document.querySelector('.role') as HTMLElement;
     socket.on("receive role", (role: string) => {
         player = role;
         if (roleDisplay) {
@@ -28,8 +37,12 @@ const main = function() {
             }
         })
     })
- 
+
     document.querySelector('.cell-wrap')?.addEventListener('click', function(e) {
+
+        if (!shouldStartGame) {
+            return;
+        }
 
         if (player === "observer")
         {

@@ -15,6 +15,7 @@ const io = new Server(server);
 
 const { winConditions, roles } = constants();
 let isGameOver = constants().isGameOver;
+let connectedPlayers = 0;
 
 
 app.use(express.static(join(__dirname, '../../client/src')));
@@ -27,6 +28,14 @@ app.get('/', (req, res) => {
 let positionsArray: Array<object> = [];
 io.on('connection', (socket) => {
   
+  connectedPlayers++;
+
+  if (connectedPlayers < 2) {
+    io.emit("waiting connection", false);
+  } else {
+    io.emit("waiting connection", true);
+  }
+
   if (!roles.length) {
     socket.emit("receive role", "observer");
   }
