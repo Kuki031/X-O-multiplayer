@@ -14,8 +14,10 @@ const io = new Server(server);
 
 
 const { winConditions, roles } = constants();
+const turnRoles: Array<string> = [...roles];
 let isGameOver = constants().isGameOver;
 let connectedPlayers = 0;
+let turn = turnRoles[Math.floor(Math.random() * turnRoles.length)];
 
 
 app.use(express.static(join(__dirname, '../../client/src')));
@@ -30,19 +32,21 @@ io.on('connection', (socket) => {
   
   connectedPlayers++;
 
-  if (connectedPlayers < 2) {
-    io.emit("waiting connection", false);
+  if (roles.length) {
+    socket.emit("receive role", roles[0]);
+    roles.shift();
+    
   } else {
-    io.emit("waiting connection", true);
-  }
-
-  if (!roles.length) {
     socket.emit("receive role", "observer");
   }
 
-  else {
-    socket.emit("receive role", roles[0]);
-    roles.shift();
+  if (connectedPlayers < 2) {
+    io.emit("waiting connection", false);
+  } else {
+    
+    io.emit("waiting connection", true);
+    io.emit("turn", turn);
+    
   }
 
   socket.on('position', (pos) => {
@@ -50,6 +54,15 @@ io.on('connection', (socket) => {
     const mainElId: number = parseInt(pos);
 
     socket.on("symbol", (symbol) => {
+
+      if (symbol === "X") {
+        turn = "O"
+      } else if (symbol === "O") {
+        turn = "X"
+      }
+
+      io.emit("turn", turn);
+
       for(let i = 0 ; i < winConditions.length ; i++) {
         const matchElInArray = winConditions[i].includes(mainElId, 0);
                 
@@ -71,6 +84,7 @@ io.on('connection', (socket) => {
       }
 
       io.emit("position", positionsArray)
+
     });
   });
 

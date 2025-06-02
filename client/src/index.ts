@@ -9,6 +9,7 @@ const socket = io();
 let shouldStopGame = false;
 let shouldStartGame: boolean;
 let player: string;
+let yourTurn: boolean;
 
 const main = function() {
 
@@ -20,6 +21,20 @@ const main = function() {
             document.querySelector(".waiting")?.classList.add("hidden");
         }
     })
+
+    socket.on("turn", (turn: string) => {
+
+        const turnText = document.querySelector(".turn") as HTMLHeadingElement;
+
+        if (turn !== player) {
+            turnText.textContent = `${player === "X" ? "O" : "X"}'s turn!`;
+            yourTurn = false;
+        } else {
+            turnText.textContent = "Your turn!";
+            yourTurn = true;
+        }
+    });
+
 
     const roleDisplay = document.querySelector('.role') as HTMLElement;
     socket.on("receive role", (role: string) => {
@@ -38,7 +53,12 @@ const main = function() {
         })
     })
 
+
     document.querySelector('.cell-wrap')?.addEventListener('click', function(e) {
+
+        if (!yourTurn) {
+            return;
+        }
 
         if (!shouldStartGame) {
             return;
