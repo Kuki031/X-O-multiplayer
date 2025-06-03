@@ -52,7 +52,6 @@ io.on('connection', (socket) => {
   socket.on('position', (pos) => {
 
     const mainElId: number = parseInt(pos);
-
     socket.on("symbol", (symbol) => {
 
       if (symbol === "X") {
@@ -76,11 +75,11 @@ io.on('connection', (socket) => {
       }
 
       positionsArray.push( {mainElId, symbol} );
-      const isOver = detectWin(winConditions);
+      const [isOver, winner, winningRow] = detectWin(winConditions);
       if (isOver)
       {
         isGameOver = true;
-        io.emit("game over", isGameOver);
+        io.emit("game over", [isGameOver, winner, winningRow]);
       }
 
       io.emit("position", positionsArray)

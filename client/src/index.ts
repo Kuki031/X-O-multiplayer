@@ -10,6 +10,7 @@ let shouldStopGame = false;
 let shouldStartGame: boolean;
 let player: string;
 let yourTurn: boolean;
+const turnText = document.querySelector(".turn") as HTMLHeadingElement;
 
 const main = function() {
 
@@ -24,14 +25,38 @@ const main = function() {
 
     socket.on("turn", (turn: string) => {
 
-        const turnText = document.querySelector(".turn") as HTMLHeadingElement;
+        if (player === "observer") {
+            turnText.textContent = `${turn}'s turn!`;
+        }
 
-        if (turn !== player) {
+        else if (turn !== player) {
+
             turnText.textContent = `${player === "X" ? "O" : "X"}'s turn!`;
             yourTurn = false;
         } else {
             turnText.textContent = "Your turn!";
             yourTurn = true;
+        }
+    });
+
+    socket.on("game over", (gameResult: Array<boolean|string|number|null>) => {
+        if (gameResult) {
+
+            const [isOver, winner, winningRow] = gameResult;
+            triggerUIUpdate(winningRow);
+            
+            if (isOver) {
+                shouldStopGame = true;
+            }
+
+            const winnerHeading = document.querySelector(".winner") as HTMLHeadingElement;
+            turnText.textContent = "Game over!";
+            
+            if (winner === player) {
+                winnerHeading.textContent = `You won!`;
+            } else {
+                winnerHeading.textContent = `Winner is ${winner}!`;
+            }
         }
     });
 
@@ -69,11 +94,6 @@ const main = function() {
             return;
         }
 
-        socket.on("game over", (gameOver: boolean) => {
-            if (gameOver) {
-                shouldStopGame = true;
-            }
-        });
 
         const mainEl = e.target as HTMLElement;
         if (!mainEl.classList.contains('cell')) {
@@ -97,3 +117,31 @@ const main = function() {
     });
 }
 main();
+
+const triggerUIUpdate = function(rowIndex: string|number|boolean|null): void {
+
+    const cellWinConditions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+];
+
+    for(let i = 0 ; i < cellWinConditions.length ; i++)
+    {
+        if (i === rowIndex)
+        {
+            cellWinConditions[i].forEach((cell, _index) => {
+                
+                const element = document.getElementById(`${cell}`) as HTMLDivElement;
+                element.style.backgroundColor = "rgb(107, 238, 107)";
+                element.style.color = "rgb(233, 51, 87)";
+            })
+            break;
+        }
+    }
+}

@@ -1,5 +1,8 @@
-export const detectWin = function(winConditions: number[][]): boolean {
+export const detectWin = function(winConditions: number[][]): Array<boolean|string|number|null> {
+
+    let winningRow: number = 0;
     let isOver: boolean = false;
+    let winner: string|number|null = null;
 
     for(let i = 0 ; i < winConditions.length ; i++) {
         
@@ -9,7 +12,8 @@ export const detectWin = function(winConditions: number[][]): boolean {
 
         for(let j = 0 ; j < winConditions[i].length ; j++) {
             if (a === b && b === c && a === c) {
-                console.log(`${winConditions[i][j]} won.`);
+                winningRow = i;
+                winner = winConditions[i][j];
                 isOver = true;
                 break;
             }
@@ -18,5 +22,6 @@ export const detectWin = function(winConditions: number[][]): boolean {
             break;
         }
     }
-    return isOver;
+
+    return [isOver, winner, winningRow];
 }

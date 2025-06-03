@@ -1,7 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 *, *::after, *::before {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+body {
+    font-family: "Inconsolata", monospace;
 }
 
 .main-wrap {
@@ -29,14 +36,14 @@
     align-items: center;
     justify-content: center;
     font-size: 52px;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    color: whitesmoke;
+    font-family: "Montserrat", sans-serif;
+    color: rgb(243, 242, 242);
     width: 150px;
     height: 150px;
-    background-color: crimson;
+    background-color: rgb(233, 51, 87);
     transition: all .2s;
     cursor: pointer;
-    border:1px solid whitesmoke;
+    border:1px solid rgb(243, 242, 242);
 }
 
 .hidden {
