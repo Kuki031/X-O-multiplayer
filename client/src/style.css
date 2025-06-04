@@ -49,3 +49,27 @@ body {
 .hidden {
     display: none;
 }
+
+.play-again {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    gap: 10px;
+}
+
+.play-again-btn {
+    padding: 10px;
+    cursor: pointer;
+    border:none;
+    background-color: rgb(233, 51, 87);
+    color: rgb(243, 242, 242);
+    transition: all .2s;
+}
+
+.play-again-btn:hover {
+    background-color: rgb(243, 242, 242);
+    color: rgb(233, 51, 87);
+}

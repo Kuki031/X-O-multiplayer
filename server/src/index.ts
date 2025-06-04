@@ -3,7 +3,7 @@
 import express from 'express';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { constants } from './constants';
 import { detectWin } from "./detectWin";
 
@@ -11,13 +11,16 @@ import { detectWin } from "./detectWin";
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
+const observers: Array<Socket> = [];
 
-
-const { winConditions, roles } = constants();
-const turnRoles: Array<string> = [...roles];
+let winConditions = constants().winConditions;
+let roles = constants().roles;
+let turnRoles: Array<string> = [...roles];
 let isGameOver = constants().isGameOver;
 let connectedPlayers = 0;
 let turn = turnRoles[Math.floor(Math.random() * turnRoles.length)];
+let playAgainCount = 0;
+let uniqueSession = Date.now();
 
 
 app.use(express.static(join(__dirname, '../../client/src')));
@@ -28,9 +31,29 @@ app.get('/', (req, res) => {
 
 
 let positionsArray: Array<object> = [];
-io.on('connection', (socket) => {
-  
-  connectedPlayers++;
+io.on('connection', async (socket) => {
+
+    connectedPlayers++;
+
+    if ((await io.fetchSockets()).length > 2) {
+      observers.push(socket);
+    }
+
+    socket.on("confirm playing again", (count: number) => {
+      playAgainCount += count;
+      
+      if (playAgainCount === 2) {
+        winConditions = constants().winConditions;
+        roles = constants().roles;
+        turnRoles = [...roles];
+        isGameOver = constants().isGameOver;
+        connectedPlayers = 0;
+        turn = turnRoles[Math.floor(Math.random() * turnRoles.length)];
+        playAgainCount = 0;
+
+        io.emit("force reload", true);
+      }
+    });
 
   if (roles.length) {
     socket.emit("receive role", roles[0]);
@@ -46,11 +69,11 @@ io.on('connection', (socket) => {
     
     io.emit("waiting connection", true);
     io.emit("turn", turn);
-    
+    io.emit("unique session", uniqueSession);
   }
 
   socket.on('position', (pos) => {
-
+    
     const mainElId: number = parseInt(pos);
     socket.on("symbol", (symbol) => {
 
@@ -84,11 +107,23 @@ io.on('connection', (socket) => {
 
       io.emit("position", positionsArray)
 
+      if (isGameOver) 
+      {
+        io.emit("play again?", playAgainCount);
+      }
     });
   });
 
   socket.on('disconnect', () => {
-    positionsArray = [];
+        winConditions = constants().winConditions;
+        roles = constants().roles;
+        turnRoles = [...roles];
+        isGameOver = constants().isGameOver;
+        connectedPlayers = 0;
+        turn = turnRoles[Math.floor(Math.random() * turnRoles.length)];
+        playAgainCount = 0;
+        positionsArray = [];
+        io.emit("force reload", true);
   });
 });
 

@@ -8,11 +8,17 @@ const socket = io();
 
 let shouldStopGame = false;
 let shouldStartGame: boolean;
-let player: string;
+let player: string|null;
 let yourTurn: boolean;
+let uniqueSession: number;
 const turnText = document.querySelector(".turn") as HTMLHeadingElement;
 
 const main = function() {
+
+    socket.on("unique session", (session: number) => {
+        uniqueSession = session;
+    });
+
 
     socket.on("waiting connection", (connReady: boolean) => {
         shouldStartGame = connReady;
@@ -57,13 +63,51 @@ const main = function() {
             } else {
                 winnerHeading.textContent = `Winner is ${winner}!`;
             }
+
+            if (player !== "observer")
+            {
+                socket.on("play again?", () => {
+                    const playAgainDiv: Element|null = document.querySelector(".play-again-wrap");
+                    playAgainDiv?.classList.remove("hidden");
+
+                    const buttonDiv: Element|null = document.querySelector(".play-again div");
+                    buttonDiv?.addEventListener("click", function(e) {
+                        let mainEl = e.target as HTMLElement;
+                        if (!mainEl.classList.contains("play-again-btn")) {
+                            return;
+                        }
+
+                        if (mainEl.textContent === "Yes") { 
+                            socket.emit("confirm playing again", 1);
+                            
+                            if(player) {
+                                localStorage.setItem(`role-${uniqueSession}`, player);
+                            }
+
+                            mainEl.style.backgroundColor = "rgb(63, 231, 63)";
+                            mainEl.style.color = "rgb(243, 242, 242)";
+                            mainEl.setAttribute("disabled", "true");
+                        } else {
+                            return;
+                        }
+                    });
+                });
+            }
+        }
+    });
+
+    socket.on("force reload", (forceReload: boolean) => {
+        if (forceReload) {
+            if (player !== "observer") {
+                window.location.reload();
+            }
         }
     });
 
 
     const roleDisplay = document.querySelector('.role') as HTMLElement;
     socket.on("receive role", (role: string) => {
-        player = role;
+        player = localStorage.getItem(`role-${uniqueSession}`) ? localStorage.getItem(`role-${uniqueSession}`) : role;
         if (roleDisplay) {
             roleDisplay.textContent = player;
         }
